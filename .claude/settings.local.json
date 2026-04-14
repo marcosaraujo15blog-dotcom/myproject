@@ -54,7 +54,12 @@
       "Bash(USE_SQLITE=True python manage.py makemigrations --no-input --verbosity=1)",
       "Bash(python manage.py check)",
       "Bash(USE_SQLITE=True python manage.py test core transportes --verbosity=2)",
-      "Bash(python manage.py migrate)"
+      "Bash(python manage.py migrate)",
+      "Bash(python manage.py runserver)",
+      "Bash(python manage.py runserver --noreload)",
+      "Bash(netstat -ano)",
+      "Bash(USE_SQLITE=True python manage.py test transportes.test_criacao core.test_permissoes --verbosity=2)",
+      "Bash(USE_SQLITE=True python manage.py test transportes.test_criacao.TransporteCreateViewTest --verbosity=2)"
     ]
   }
 }
