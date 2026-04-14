@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}{{ titulo }} - ERP Logística{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1><i class="bi bi-file-earmark-text me-2"></i>{{ titulo }}</h1>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'transportes:editar' transporte.pk %}" class="btn btn-primary">
+      <i class="bi bi-pencil me-1"></i> Editar
+    </a>
+    <a href="{% url 'transportes:lista' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i> Voltar
+    </a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Dados Gerais -->
+  <div class="col-lg-8">
+    <div class="form-card mb-3">
+      <div class="form-section-title"><i class="bi bi-info-circle me-2"></i>Dados do Transporte</div>
+      <div class="row g-2">
+        <div class="col-sm-6">
+          <div class="text-muted small">Nº Transporte</div>
+          <div class="fw-bold fs-5 text-primary">{{ transporte.numero_transporte }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small">Documento</div>
+          <div class="fw-semibold">{{ transporte.documento_transporte|default:"-" }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small">Data</div>
+          <div class="fw-semibold">{{ transporte.data_transporte|date:"d/m/Y" }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small">Motorista</div>
+          <div class="fw-semibold">{{ transporte.motorista.nome }}</div>
+          <small class="text-muted">CPF: {{ transporte.motorista.cpf }}</small>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small">Veículo</div>
+          <div class="fw-semibold">{{ transporte.veiculo.placa }}</div>
+          <small class="text-muted">{{ transporte.veiculo.modelo }}</small>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small">Status</div>
+          <span class="badge-status badge-{{ transporte.status_transporte }}">
+            {{ transporte.get_status_transporte_display }}
+          </span>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small">Pagamento</div>
+          <span class="badge-status badge-{{ transporte.status_pagamento }}">
+            {{ transporte.get_status_pagamento_display }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entregas -->
+    <div class="form-card">
+      <div class="form-section-title"><i class="bi bi-list-check me-2"></i>Entregas</div>
+      {% if transporte.entregas.all %}
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm">
+          <thead class="table-light">
+            <tr>
+              <th>Ordem</th>
+              <th>Cliente</th>
+              <th>Nome Mercado</th>
+              <th>Empresa Descarga</th>
+              <th class="text-center">Pallets</th>
+              <th class="text-end">Valor Unit.</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in transporte.entregas.all %}
+            <tr>
+              <td class="text-center">{{ e.ordem_entrega }}</td>
+              <td>{{ e.cliente.nome_femsa }}</td>
+              <td>{{ e.cliente.nome_mercado }}</td>
+              <td>{{ e.empresa_descarga.nome_fantasia|default:"-" }}</td>
+              <td class="text-center">{{ e.pallets }}</td>
+              <td class="text-end">{{ e.valor_pallet|brl }}</td>
+              <td class="text-end fw-bold">{{ e.valor_total|brl }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-light">
+            <tr>
+              <td colspan="4" class="text-end fw-bold">Subtotal Entregas:</td>
+              <td class="text-center fw-bold">{{ transporte.total_pallets }}</td>
+              <td></td>
+              <td class="text-end fw-bold text-primary">{{ transporte.total_entregas|brl }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted">Nenhuma entrega registrada.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Resumo Financeiro -->
+  <div class="col-lg-4">
+    <div class="form-card">
+      <div class="form-section-title"><i class="bi bi-calculator me-2"></i>Resumo Financeiro</div>
+      <table class="table table-sm">
+        <tr>
+          <td class="text-muted">Total Entregas</td>
+          <td class="text-end fw-semibold">{{ transporte.total_entregas|brl }}</td>
+        </tr>
+        <tr>
+          <td class="text-muted">(-) Desconto</td>
+          <td class="text-end text-danger">{{ transporte.desconto|brl }}</td>
+        </tr>
+        <tr>
+          <td class="text-muted">(+) Acréscimo</td>
+          <td class="text-end text-success">{{ transporte.acrescimo|brl }}</td>
+        </tr>
+        <tr>
+          <td class="text-muted">(-) Adiantamento</td>
+          <td class="text-end text-danger">{{ transporte.adiantamento|brl }}</td>
+        </tr>
+        <tr>
+          <td class="text-muted">(-) Frete Terceiro</td>
+          <td class="text-end text-danger">{{ transporte.frete_terceiro|brl }}</td>
+        </tr>
+        <tr class="table-primary">
+          <td class="fw-bold">Total Final</td>
+          <td class="text-end fw-bold fs-5">{{ transporte.total_final|brl }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}Financeiro - ERP Logística{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1><i class="bi bi-currency-dollar me-2"></i>{{ titulo }}</h1>
+    <p>{{ subtitulo }}</p>
+  </div>
+</div>
+
+<!-- Totalizadores -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="totalizador-card azul">
+      <div class="label"><i class="bi bi-file-earmark-text me-1"></i>Total a receber</div>
+      <div class="valor">{{ total_receber|brl }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="totalizador-card verde">
+      <div class="label"><i class="bi bi-check-circle me-1"></i>Total recebido</div>
+      <div class="valor">{{ total_recebido|brl }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="totalizador-card laranja">
+      <div class="label"><i class="bi bi-hourglass-split me-1"></i>Total pendente</div>
+      <div class="valor">{{ total_pendente|brl }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filtros -->
+<div class="filter-card">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Data início</label>
+      <input type="date" name="data_inicio" value="{{ data_inicio }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Data fim</label>
+      <input type="date" name="data_fim" value="{{ data_fim }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Cliente</label>
+      <select name="cliente" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        {% for c in clientes %}
+        <option value="{{ c.codigo_cliente }}" {% if cliente_filtro == c.codigo_cliente %}selected{% endif %}>
+          {{ c.nome_femsa }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Motorista</label>
+      <select name="motorista" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        {% for m in motoristas %}
+        <option value="{{ m.cpf }}" {% if motorista_filtro == m.cpf %}selected{% endif %}>
+          {{ m.nome }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Status pagamento</label>
+      <select name="status_pagamento" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        {% for val, label in status_pagamento_choices %}
+        <option value="{{ val }}" {% if status_pagamento_filtro == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-primary btn-sm w-100">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    {% if data_inicio or data_fim or cliente_filtro or motorista_filtro or status_pagamento_filtro %}
+    <div class="col-12">
+      <a href="{% url 'financeiro:lista' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-x me-1"></i>Limpar filtros
+      </a>
+    </div>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Tabela financeira -->
+<div class="table-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Nº Doc.</th>
+          <th>Data</th>
+          <th>Beneficiário (Motorista)</th>
+          <th>Aquário</th>
+          <th class="text-end">Frete</th>
+          <th class="text-end">Desc.</th>
+          <th class="text-end">Acrés.</th>
+          <th class="text-end">Adiant.</th>
+          <th class="text-end fw-bold">Total Final</th>
+          <th>Pagamento</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in transportes %}
+        <tr>
+          <td>
+            <a href="{% url 'transportes:detalhe' t.pk %}" class="fw-bold text-decoration-none">
+              {{ t.numero_transporte }}
+            </a>
+            {% if t.documento_transporte %}
+            <br><small class="text-muted">{{ t.documento_transporte }}</small>
+            {% endif %}
+          </td>
+          <td>{{ t.data_transporte|date:"d/m/Y" }}</td>
+          <td>
+            <div class="fw-semibold">{{ t.motorista.nome }}</div>
+            <small class="text-muted">{{ t.veiculo.placa }}</small>
+          </td>
+          <td>
+            {% for e in t.entregas.all %}
+              <small class="d-block">{{ e.cliente.nome_femsa }}</small>
+            {% empty %}
+              <span class="text-muted">-</span>
+            {% endfor %}
+          </td>
+          <td class="text-end">{{ t.total_entregas|brl }}</td>
+          <td class="text-end text-danger">{{ t.desconto|brl }}</td>
+          <td class="text-end text-success">{{ t.acrescimo|brl }}</td>
+          <td class="text-end text-danger">{{ t.adiantamento|brl }}</td>
+          <td class="text-end fw-bold {% if t.status_pagamento == 'pago' %}text-success{% elif t.status_pagamento == 'pendente' %}text-warning{% endif %}">
+            {{ t.total_final|brl }}
+          </td>
+          <td>
+            <span class="badge-status badge-{{ t.status_pagamento }}">
+              {{ t.get_status_pagamento_display }}
+            </span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+            Nenhum registro encontrado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/paginacao.html' %}
+</div>
+{% endblock %}

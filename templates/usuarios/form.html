@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ titulo }} - ERP Logística{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1><i class="bi bi-person-plus me-2"></i>{{ titulo }}</h1>
+  </div>
+  <a href="{% url 'usuarios:lista' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Voltar
+  </a>
+</div>
+
+<div class="form-card" style="max-width:700px">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Nome *</label>
+        {% render_field form.first_name class="form-control" %}
+        {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors }}</div>{% endif %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Sobrenome</label>
+        {% render_field form.last_name class="form-control" %}
+      </div>
+      {% if form.username %}
+      <div class="col-md-6">
+        <label class="form-label">Login (usuário) *</label>
+        {% render_field form.username class="form-control" %}
+        {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors }}</div>{% endif %}
+      </div>
+      {% endif %}
+      <div class="col-md-6">
+        <label class="form-label">E-mail</label>
+        {% render_field form.email class="form-control" %}
+      </div>
+      {% if form.password %}
+      <div class="col-md-6">
+        <label class="form-label">Senha *</label>
+        {% render_field form.password class="form-control" %}
+        {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors }}</div>{% endif %}
+      </div>
+      {% endif %}
+      <div class="col-md-6">
+        <label class="form-label">Tipo de Usuário *</label>
+        {% render_field form.tipo_usuario class="form-select" %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Empresa *</label>
+        {% render_field form.empresa class="form-select" %}
+      </div>
+      {% if form.is_active %}
+      <div class="col-12">
+        <div class="form-check">
+          {% render_field form.is_active class="form-check-input" %}
+          <label class="form-check-label">Usuário ativo</label>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg me-1"></i> Salvar
+      </button>
+      <a href="{% url 'usuarios:lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

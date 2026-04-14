@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}Clientes - ERP Logística{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1><i class="bi bi-building me-2"></i>{{ titulo }}</h1>
+    <p>{{ subtitulo }}</p>
+  </div>
+  <a href="{% url 'clientes:criar' %}" class="btn-primary-custom">
+    <i class="bi bi-plus-lg"></i> Novo Cliente
+  </a>
+</div>
+
+<div class="filter-card">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-8">
+      <input type="text" name="q" value="{{ q }}" class="form-control"
+             placeholder="Buscar por código, nome Femsa ou nome mercado...">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-search me-1"></i> Buscar
+      </button>
+    </div>
+    {% if q %}
+    <div class="col-md-2">
+      <a href="{% url 'clientes:lista' %}" class="btn btn-outline-secondary w-100">Limpar</a>
+    </div>
+    {% endif %}
+  </form>
+</div>
+
+<div class="table-card">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome Femsa</th>
+          <th>Nome Mercado</th>
+          <th>Tipo Equip.</th>
+          <th>Tipo Cobrança</th>
+          <th>Valor (R$)</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clientes %}
+        <tr>
+          <td><span class="badge bg-secondary">{{ c.codigo_cliente }}</span></td>
+          <td class="fw-semibold">{{ c.nome_femsa }}</td>
+          <td>{{ c.nome_mercado }}</td>
+          <td>{{ c.get_tipo_equipamento_display }}</td>
+          <td>
+            <span class="badge-status badge-programado">
+              {{ c.get_valor_tipo_display }}
+            </span>
+          </td>
+          <td>{{ c.valor_pallet|brl }}</td>
+          <td class="text-center">
+            <div class="d-flex gap-1 justify-content-center">
+              <a href="{% url 'clientes:editar' c.pk %}"
+                 class="btn btn-sm btn-outline-primary" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'clientes:excluir' c.pk %}"
+                 class="btn btn-sm btn-outline-danger" title="Excluir">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+            Nenhum cliente encontrado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/paginacao.html' %}
+</div>
+{% endblock %}

@@ -1,0 +1,4 @@
+Django>=5.1,<6.0
+python-decouple>=3.8
+django-widget-tweaks>=1.5
+# psycopg2-binary>=2.9  # descomente para PostgreSQL

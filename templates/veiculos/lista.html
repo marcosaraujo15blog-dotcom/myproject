@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Veículos - ERP Logística{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1><i class="bi bi-truck-front me-2"></i>{{ titulo }}</h1>
+    <p>{{ subtitulo }}</p>
+  </div>
+  <a href="{% url 'veiculos:criar' %}" class="btn-primary-custom">
+    <i class="bi bi-plus-lg"></i> Novo Veículo
+  </a>
+</div>
+
+<div class="filter-card">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-5">
+      <input type="text" name="q" value="{{ q }}" class="form-control"
+             placeholder="Buscar por placa, modelo ou motorista...">
+    </div>
+    <div class="col-md-3">
+      <select name="status" class="form-select">
+        <option value="">Todos os status</option>
+        <option value="ativo" {% if status_filtro == 'ativo' %}selected{% endif %}>Ativo</option>
+        <option value="inativo" {% if status_filtro == 'inativo' %}selected{% endif %}>Inativo</option>
+        <option value="manutencao" {% if status_filtro == 'manutencao' %}selected{% endif %}>Em Manutenção</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-search me-1"></i> Filtrar
+      </button>
+    </div>
+    {% if q or status_filtro %}
+    <div class="col-md-2">
+      <a href="{% url 'veiculos:lista' %}" class="btn btn-outline-secondary w-100">Limpar</a>
+    </div>
+    {% endif %}
+  </form>
+</div>
+
+<div class="table-card">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Placa</th>
+          <th>Modelo</th>
+          <th>Ano</th>
+          <th>Carroceria</th>
+          <th>Vínculo</th>
+          <th>Motorista</th>
+          <th>Paletes</th>
+          <th>Status</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in veiculos %}
+        <tr>
+          <td class="fw-bold">{{ v.placa }}</td>
+          <td>{{ v.modelo }}</td>
+          <td>{{ v.ano }}</td>
+          <td>{{ v.get_tipo_carroceria_display }}</td>
+          <td><span class="badge bg-info text-dark">{{ v.get_tipo_vinculo_display }}</span></td>
+          <td>{{ v.motorista.nome|default:"-" }}</td>
+          <td>{{ v.qtd_palete }}</td>
+          <td>
+            <span class="badge-status badge-{% if v.status == 'ativo' %}entregue{% elif v.status == 'manutencao' %}em_andamento{% else %}cancelado{% endif %}">
+              {{ v.get_status_display }}
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="d-flex gap-1 justify-content-center">
+              <a href="{% url 'veiculos:editar' v.pk %}"
+                 class="btn btn-sm btn-outline-primary" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'veiculos:excluir' v.pk %}"
+                 class="btn btn-sm btn-outline-danger" title="Excluir">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+            Nenhum veículo encontrado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/paginacao.html' %}
+</div>
+{% endblock %}

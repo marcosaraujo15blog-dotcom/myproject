@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}Dashboard - ERP Logística{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h1>
+    <p>Visão geral da operação logística</p>
+  </div>
+</div>
+
+<!-- Cards de resumo -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card-stat">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+          <i class="bi bi-calendar-check"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ transportes_hoje }}</div>
+          <div class="stat-label">Transportes Hoje</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card-stat">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+          <i class="bi bi-truck"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ transportes_andamento }}</div>
+          <div class="stat-label">Em Andamento</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card-stat">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-success bg-opacity-10 text-success">
+          <i class="bi bi-currency-dollar"></i>
+        </div>
+        <div>
+          <div class="stat-value" style="font-size:18px">{{ total_faturamento|brl }}</div>
+          <div class="stat-label">Faturamento (Pago)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card-stat">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+          <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div>
+          <div class="stat-value" style="font-size:18px">{{ total_pendente|brl }}</div>
+          <div class="stat-label">A Receber (Pendente)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Últimos transportes -->
+<div class="table-card">
+  <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+    <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>Últimos Transportes</h6>
+    <a href="{% url 'transportes:lista' %}" class="btn btn-sm btn-outline-primary">
+      Ver todos <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+  {% if ultimos_transportes %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Nº Transporte</th>
+          <th>Data</th>
+          <th>Motorista</th>
+          <th>Veículo</th>
+          <th>Status</th>
+          <th>Pagamento</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in ultimos_transportes %}
+        <tr>
+          <td>
+            <a href="{% url 'transportes:detalhe' t.pk %}" class="fw-bold text-decoration-none">
+              {{ t.numero_transporte }}
+            </a>
+          </td>
+          <td>{{ t.data_transporte|date:"d/m/Y" }}</td>
+          <td>{{ t.motorista.nome }}</td>
+          <td>{{ t.veiculo.placa }}</td>
+          <td>
+            <span class="badge-status badge-{{ t.status_transporte }}">
+              {{ t.get_status_transporte_display }}
+            </span>
+          </td>
+          <td>
+            <span class="badge-status badge-{{ t.status_pagamento }}">
+              {{ t.get_status_pagamento_display }}
+            </span>
+          </td>
+          <td class="fw-bold">{{ t.total_final|brl }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+    Nenhum transporte encontrado.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+# Django
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+db.sqlite3
+.env
+staticfiles/
+media/
+
+# Python
+*.egg-info/
+dist/
+build/
+*.egg
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project

@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}Programação - ERP Logística{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1><i class="bi bi-calendar-week me-2"></i>{{ titulo }}</h1>
+    <p>{{ subtitulo }}</p>
+  </div>
+  <a href="{% url 'transportes:criar' %}" class="btn-primary-custom">
+    <i class="bi bi-plus-lg"></i> Novo Transporte
+  </a>
+</div>
+
+<!-- Filtros -->
+<div class="filter-card">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Busca rápida</label>
+      <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm"
+             placeholder="Nº transporte, motorista, placa...">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Data início</label>
+      <input type="date" name="data_inicio" value="{{ data_inicio }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Data fim</label>
+      <input type="date" name="data_fim" value="{{ data_fim }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Motorista</label>
+      <select name="motorista" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        {% for m in motoristas %}
+        <option value="{{ m.cpf }}" {% if motorista_filtro == m.cpf %}selected{% endif %}>
+          {{ m.nome }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Status</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="">Todos status</option>
+        {% for val, label in status_choices %}
+        <option value="{{ val }}" {% if status_filtro == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-primary btn-sm w-100">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    {% if q or data_inicio or data_fim or status_filtro or motorista_filtro %}
+    <div class="col-12">
+      <a href="{% url 'transportes:lista' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-x me-1"></i>Limpar filtros
+      </a>
+    </div>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Tabela de programação -->
+<div class="table-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle" id="tabelaTransportes">
+      <thead>
+        <tr>
+          <th style="width:40px"></th>
+          <th>Nº Transporte</th>
+          <th>Doc.</th>
+          <th>Data</th>
+          <th>Motorista</th>
+          <th>Placa</th>
+          <th class="text-center">Entregas</th>
+          <th class="text-center">Pallets</th>
+          <th class="text-end">Total (R$)</th>
+          <th>Status</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in transportes %}
+        <tr class="transporte-row" data-id="{{ t.pk }}">
+          <td>
+            <button class="btn btn-sm btn-light btn-expandir" data-id="{{ t.pk }}" title="Ver entregas">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </td>
+          <td><strong class="text-primary">{{ t.numero_transporte }}</strong></td>
+          <td>{{ t.documento_transporte|default:"-" }}</td>
+          <td>{{ t.data_transporte|date:"d/m/Y" }}</td>
+          <td>{{ t.motorista.nome }}</td>
+          <td><span class="badge bg-light text-dark border">{{ t.veiculo.placa }}</span></td>
+          <td class="text-center">{{ t.qtd_entregas }}</td>
+          <td class="text-center">{{ t.total_pallets }}</td>
+          <td class="text-end fw-bold">{{ t.total_final|brl }}</td>
+          <td>
+            <span class="badge-status badge-{{ t.status_transporte }}">
+              {{ t.get_status_transporte_display }}
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="d-flex gap-1 justify-content-center">
+              <a href="{% url 'transportes:detalhe' t.pk %}"
+                 class="btn btn-sm btn-outline-secondary" title="Detalhes">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="{% url 'transportes:editar' t.pk %}"
+                 class="btn btn-sm btn-outline-primary" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'transportes:excluir' t.pk %}"
+                 class="btn btn-sm btn-outline-danger" title="Excluir">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        <!-- Linha expandida com entregas -->
+        <tr class="entrega-row-expandida d-none" id="entregas-{{ t.pk }}">
+          <td colspan="11">
+            <div class="p-3">
+              <h6 class="mb-2 fw-bold text-primary">
+                <i class="bi bi-list-ul me-2"></i>Entregas do Transporte {{ t.numero_transporte }}
+              </h6>
+              {% if t.entregas.all %}
+              <table class="table table-sm mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Ordem</th>
+                    <th>Cliente</th>
+                    <th>Empresa Descarga</th>
+                    <th>Pallets</th>
+                    <th>Valor Unit.</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for e in t.entregas.all %}
+                  <tr>
+                    <td>{{ e.ordem_entrega }}</td>
+                    <td>{{ e.cliente.nome_femsa }}</td>
+                    <td>{{ e.empresa_descarga.nome_fantasia|default:"-" }}</td>
+                    <td>{{ e.pallets }}</td>
+                    <td>{{ e.valor_pallet|brl }}</td>
+                    <td class="fw-bold">{{ e.valor_total|brl }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              {% else %}
+              <p class="text-muted mb-0">Nenhuma entrega registrada.</p>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="11" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+            Nenhum transporte encontrado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/paginacao.html' %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Expandir/colapsar entregas
+document.querySelectorAll('.btn-expandir').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const id = this.dataset.id;
+    const row = document.getElementById('entregas-' + id);
+    const icon = this.querySelector('i');
+    if (row) {
+      row.classList.toggle('d-none');
+      icon.classList.toggle('bi-chevron-right');
+      icon.classList.toggle('bi-chevron-down');
+    }
+  });
+});
+</script>
+{% endblock %}

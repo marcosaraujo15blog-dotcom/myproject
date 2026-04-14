@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ titulo }} - ERP Logística{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1><i class="bi bi-person-badge me-2"></i>{{ titulo }}</h1>
+  </div>
+  <a href="{% url 'motoristas:lista' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Voltar
+  </a>
+</div>
+
+<div class="form-card" style="max-width:800px">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="form-section-title"><i class="bi bi-person me-2"></i>Dados Pessoais</div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">CPF *</label>
+        {% render_field form.cpf %}
+        {% if form.cpf.errors %}<div class="text-danger small mt-1">{{ form.cpf.errors }}</div>{% endif %}
+      </div>
+      <div class="col-md-8">
+        <label class="form-label">Nome Completo *</label>
+        {% render_field form.nome %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Data de Nascimento</label>
+        {% render_field form.data_nascimento %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Telefone</label>
+        {% render_field form.telefone %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Status *</label>
+        {% render_field form.status %}
+      </div>
+    </div>
+
+    <div class="form-section-title mt-4"><i class="bi bi-card-heading me-2"></i>Habilitação (CNH)</div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Nº CNH *</label>
+        {% render_field form.cnh %}
+        {% if form.cnh.errors %}<div class="text-danger small mt-1">{{ form.cnh.errors }}</div>{% endif %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Categoria *</label>
+        {% render_field form.categoria_cnh %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Expedição CNH *</label>
+        {% render_field form.data_expedicao_cnh %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Vencimento CNH *</label>
+        {% render_field form.data_vencimento_cnh %}
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg me-1"></i> Salvar
+      </button>
+      <a href="{% url 'motoristas:lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
