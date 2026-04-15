@@ -24,7 +24,8 @@ class TransporteForm(forms.ModelForm):
         widgets = {
             'documento_transporte': forms.TextInput(attrs={'class': 'form-control'}),
             'data_transporte': forms.DateInput(
-                attrs={'class': 'form-control', 'type': 'date'}
+                attrs={'class': 'form-control', 'type': 'date'},
+                format='%Y-%m-%d',
             ),
             'veiculo': forms.Select(attrs={'class': 'form-select'}),
             'motorista': forms.Select(attrs={'class': 'form-select'}),

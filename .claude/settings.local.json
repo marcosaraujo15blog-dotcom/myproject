@@ -63,7 +63,10 @@
       "Bash(ipconfig)",
       "Bash(powershell:*)",
       "Bash(python manage.py runserver 0.0.0.0:8000 --noreload)",
-      "Bash(ping -n 1 172.16.200.32)"
+      "Bash(ping -n 1 172.16.200.32)",
+      "Bash(USE_SQLITE=True python manage.py test transportes --verbosity=2)",
+      "Bash(USE_SQLITE=True python manage.py test core transportes --verbosity=1)",
+      "Bash(USE_SQLITE=True python:*)"
     ]
   }
 }

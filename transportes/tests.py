@@ -293,16 +293,22 @@ class CalcularTotalTransporteTest(TestCase):
         self.assertEqual(calcular_total_transporte(t), Decimal('800'))
 
     def test_com_frete_terceiro(self):
-        # R$ 1.000 − R$ 150 frete = R$ 850
+        # R$ 1.000 + R$ 150 frete terceiro = R$ 1.150 (custo repassado ao cliente)
         t = self._criar_transporte_com_entrega(frete=150)
-        self.assertEqual(calcular_total_transporte(t), Decimal('850'))
+        self.assertEqual(calcular_total_transporte(t), Decimal('1150'))
+
+    def test_frete_terceiro_e_somado_ao_total(self):
+        """frete_terceiro aumenta o total — é custo repassado ao cliente, não dedução."""
+        t = self._criar_transporte_com_entrega(frete=200)
+        self.assertGreater(calcular_total_transporte(t), Decimal('1000'))
+        self.assertEqual(calcular_total_transporte(t), Decimal('1200'))
 
     def test_formula_completa(self):
-        # R$ 1.000 − 50 + 30 − 200 − 150 = R$ 630
+        # R$ 1.000 − 50 + 30 − 200 + 150 = R$ 930
         t = self._criar_transporte_com_entrega(
             desconto=50, acrescimo=30, adiantamento=200, frete=150
         )
-        self.assertEqual(calcular_total_transporte(t), Decimal('630'))
+        self.assertEqual(calcular_total_transporte(t), Decimal('930'))
 
     def test_propriedade_total_final_usa_servico(self):
         """Transporte.total_final deve retornar o mesmo que calcular_total_transporte."""

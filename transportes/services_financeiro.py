@@ -91,7 +91,7 @@ def calcular_total_transporte(transporte):
                     − desconto
                     + acrescimo
                     − adiantamento
-                    − frete_terceiro
+                    + frete_terceiro
 
     Todos os campos financeiros têm default=0 no banco, portanto nunca são None.
     """
@@ -100,7 +100,7 @@ def calcular_total_transporte(transporte):
         - transporte.desconto
         + transporte.acrescimo
         - transporte.adiantamento
-        - transporte.frete_terceiro
+        + transporte.frete_terceiro
     )
 
 

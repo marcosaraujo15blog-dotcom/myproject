@@ -3,6 +3,11 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views import View
 
 from core.mixins import OperacionalMixin
 from .models import Cliente
@@ -76,3 +81,26 @@ class ClienteDeleteView(OperacionalMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Cliente excluído com sucesso!')
         return super().form_valid(form)
+
+
+@method_decorator(login_required, name='dispatch')
+class ClienteInfoView(View):
+    """
+    Endpoint JSON para o formulário de transporte.
+    Retorna valor_tipo e valor_pallet do cliente para pré-preencher
+    o campo Valor Unit. (R$) quando o tipo for carga_cheia ou descarga_direto.
+    Respeita isolamento por empresa.
+    """
+
+    def get(self, request, pk):
+        # Superusuários veem todos; usuários normais só da própria empresa
+        if request.user.is_superuser:
+            cliente = get_object_or_404(Cliente, pk=pk)
+        else:
+            empresa = request.user.usuario.empresa
+            cliente = get_object_or_404(Cliente, pk=pk, empresa=empresa)
+
+        return JsonResponse({
+            'valor_tipo': cliente.valor_tipo,
+            'valor_pallet': str(cliente.valor_pallet),
+        })

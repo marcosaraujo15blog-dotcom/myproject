@@ -1,5 +1,6 @@
 """Regras de negócio para Transportes."""
 
+from django.db import transaction
 from django.db.models import Q
 
 
@@ -23,10 +24,12 @@ def filtrar_transportes(qs, q='', data_inicio='', data_fim='', status='', motori
     return qs
 
 
+@transaction.atomic
 def salvar_transporte_com_entregas(form, entrega_formset):
     """
     Persiste o Transporte e suas Entregas de forma atômica.
     Assume que form e entrega_formset já foram validados.
+    Em caso de erro, toda a operação é revertida (rollback).
     Retorna o objeto Transporte salvo.
     """
     transporte = form.save()

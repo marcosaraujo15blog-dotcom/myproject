@@ -32,15 +32,18 @@ class MotoristaForm(forms.ModelForm):
             }),
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'data_nascimento': forms.DateInput(
-                attrs={'class': 'form-control', 'type': 'date'}
+                attrs={'class': 'form-control', 'type': 'date'},
+                format='%Y-%m-%d',
             ),
             'cnh': forms.TextInput(attrs={'class': 'form-control'}),
             'categoria_cnh': forms.Select(attrs={'class': 'form-select'}),
             'data_vencimento_cnh': forms.DateInput(
-                attrs={'class': 'form-control', 'type': 'date'}
+                attrs={'class': 'form-control', 'type': 'date'},
+                format='%Y-%m-%d',
             ),
             'data_expedicao_cnh': forms.DateInput(
-                attrs={'class': 'form-control', 'type': 'date'}
+                attrs={'class': 'form-control', 'type': 'date'},
+                format='%Y-%m-%d',
             ),
             'telefone': forms.TextInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
