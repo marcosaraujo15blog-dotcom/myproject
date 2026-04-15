@@ -203,10 +203,11 @@ function calcularEntrega(formEl) {
   const valorInput   = formEl.querySelector('input[name$="-valor_pallet"]');
   const totalEl      = formEl.querySelector('.entrega-total');
   if (!palletsInput || !valorInput || !totalEl) return 0;
-  const pallets = parseFloat(palletsInput.value) || 0;
-  const valor   = parseFloat(valorInput.value)   || 0;
-  // Usa pallets se > 0, senão valor fixo
-  const total   = pallets > 0 ? valor * pallets : valor;
+  const pallets   = parseFloat(palletsInput.value) || 0;
+  const valor     = parseFloat(valorInput.value)   || 0;
+  const valorTipo = formEl.dataset.valorTipo || 'por_palete';
+  // carga_cheia e descarga_direto: valor fixo, nunca multiplicar por pallets
+  const total = (valorTipo === 'por_palete') ? valor * pallets : valor;
   totalEl.textContent = brl(total);
   return total;
 }
@@ -216,11 +217,11 @@ function recalcularResumo() {
   document.querySelectorAll('.entrega-form:not(.d-none)').forEach(el => {
     totalEntregas += calcularEntrega(el);
   });
-  const desconto    = parseFloat(document.querySelector('[name="desconto"]')?.value)        || 0;
-  const acrescimo   = parseFloat(document.querySelector('[name="acrescimo"]')?.value)       || 0;
-  const adiantamento= parseFloat(document.querySelector('[name="adiantamento"]')?.value)    || 0;
-  const frete       = parseFloat(document.querySelector('[name="frete_terceiro"]')?.value)  || 0;
-  const total       = totalEntregas - desconto + acrescimo - adiantamento + frete;
+  const desconto     = parseFloat(document.querySelector('[name="desconto"]')?.value)       || 0;
+  const acrescimo    = parseFloat(document.querySelector('[name="acrescimo"]')?.value)      || 0;
+  const adiantamento = parseFloat(document.querySelector('[name="adiantamento"]')?.value)   || 0;
+  const frete        = parseFloat(document.querySelector('[name="frete_terceiro"]')?.value) || 0;
+  const total        = totalEntregas - desconto + acrescimo - adiantamento + frete;
 
   document.getElementById('resumo-entregas').textContent    = brl(totalEntregas);
   document.getElementById('resumo-desconto').textContent    = brl(desconto);
@@ -240,37 +241,46 @@ document.addEventListener('input', e => {
   if (e.target.matches('[name*="-pallets"],[name*="-valor_pallet"]')) recalcularResumo();
 });
 
-// --- Preenche Valor Unit. automaticamente ao selecionar cliente ---
-// Para carga_cheia e descarga_direto o valor vem do cadastro do cliente.
-function preencherValorCliente(selectEl) {
-  const pk = selectEl.value;
+// --- Info do cliente via API ---
+// atualizarValor=true : troca o cliente → preenche valor_pallet se tipo fixo
+// atualizarValor=false: carregamento da página → só registra data-valor-tipo, sem sobrescrever valor já salvo
+function carregarInfoCliente(selectEl, atualizarValor) {
+  const pk     = selectEl.value;
   const formEl = selectEl.closest('.entrega-form');
-  const valorInput = formEl?.querySelector('input[name$="-valor_pallet"]');
-  if (!pk || !valorInput) return;
+  if (!pk || !formEl) return;
+  const valorInput = formEl.querySelector('input[name$="-valor_pallet"]');
+  if (!valorInput) return;
 
   fetch(`/clientes/${pk}/info/`)
     .then(r => r.ok ? r.json() : Promise.reject(r.status))
     .then(data => {
-      if (data.valor_tipo === 'carga_cheia' || data.valor_tipo === 'descarga_direto') {
+      formEl.dataset.valorTipo = data.valor_tipo;
+      if (atualizarValor && (data.valor_tipo === 'carga_cheia' || data.valor_tipo === 'descarga_direto')) {
         valorInput.value = data.valor_pallet;
-        recalcularResumo();
       }
+      recalcularResumo();
     })
-    .catch(() => {}); // silencia erros de rede
+    .catch(() => {});
 }
 
+// Ao trocar o cliente: preenche valor e registra tipo
 document.addEventListener('change', e => {
   if (e.target.matches('select[name*="-cliente"]')) {
-    preencherValorCliente(e.target);
+    carregarInfoCliente(e.target, true);
   }
+});
+
+// Ao carregar a página (modo edição): registra tipo sem sobrescrever valor já salvo
+document.querySelectorAll('select[name*="-cliente"]').forEach(sel => {
+  if (sel.value) carregarInfoCliente(sel, false);
 });
 
 // --- Adicionar nova entrega ---
 document.getElementById('btnAddEntrega')?.addEventListener('click', function() {
   const totalFormsEl = document.querySelector('[name="entregas-TOTAL_FORMS"]');
   if (!totalFormsEl) return;
-  const maxForms  = parseInt(document.querySelector('[name="entregas-MAX_NUM_FORMS"]')?.value || 3);
-  const visible   = document.querySelectorAll('.entrega-form:not(.d-none)').length;
+  const maxForms = parseInt(document.querySelector('[name="entregas-MAX_NUM_FORMS"]')?.value || 3);
+  const visible  = document.querySelectorAll('.entrega-form:not(.d-none)').length;
   if (visible >= maxForms) { alert('Máximo de ' + maxForms + ' entregas por transporte.'); return; }
 
   const current   = parseInt(totalFormsEl.value);
@@ -280,6 +290,7 @@ document.getElementById('btnAddEntrega')?.addEventListener('click', function() {
   const newForm = firstForm.cloneNode(true);
   newForm.classList.remove('d-none');
   newForm.dataset.formIndex = current;
+  delete newForm.dataset.valorTipo; // nova entrega começa sem tipo registrado
 
   newForm.querySelectorAll('input, select, textarea').forEach(el => {
     if (el.name) el.name = el.name.replace(/-\d+-/, `-${current}-`);
@@ -291,7 +302,6 @@ document.getElementById('btnAddEntrega')?.addEventListener('click', function() {
     el.htmlFor = el.htmlFor.replace(/-\d+-/, `-${current}-`);
   });
 
-  // Atualiza número da entrega no header
   const header = newForm.querySelector('.entrega-header span');
   if (header) header.innerHTML = `<i class="bi bi-box-seam me-1"></i>Entrega ${visible + 1}`;
   const totalEl = newForm.querySelector('.entrega-total');
@@ -312,7 +322,8 @@ document.addEventListener('click', e => {
   }
 });
 
-// Calcula ao carregar (modo edição)
+// Calcula ao carregar — o recalculo correto acontece depois que carregarInfoCliente
+// atualizar os data-valor-tipo via fetch assíncrono
 recalcularResumo();
 </script>
 {% endblock %}
