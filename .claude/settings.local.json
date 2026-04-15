@@ -59,7 +59,11 @@
       "Bash(python manage.py runserver --noreload)",
       "Bash(netstat -ano)",
       "Bash(USE_SQLITE=True python manage.py test transportes.test_criacao core.test_permissoes --verbosity=2)",
-      "Bash(USE_SQLITE=True python manage.py test transportes.test_criacao.TransporteCreateViewTest --verbosity=2)"
+      "Bash(USE_SQLITE=True python manage.py test transportes.test_criacao.TransporteCreateViewTest --verbosity=2)",
+      "Bash(ipconfig)",
+      "Bash(powershell:*)",
+      "Bash(python manage.py runserver 0.0.0.0:8000 --noreload)",
+      "Bash(ping -n 1 172.16.200.32)"
     ]
   }
 }
