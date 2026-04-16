@@ -8,10 +8,14 @@ class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
         fields = [
-            'nome_femsa', 'nome_mercado', 'tipo_equipamento',
+            'cod_femsa', 'nome_femsa', 'nome_mercado', 'tipo_equipamento',
             'tipo_descarga', 'qtd_chapas', 'valor_tipo', 'valor_pallet',
         ]
         widgets = {
+            'cod_femsa': forms.TextInput(attrs={
+                'class': 'form-control', 'maxlength': '10',
+                'placeholder': 'Ex.: 1234567890',
+            }),
             'nome_femsa': forms.TextInput(attrs={'class': 'form-control'}),
             'nome_mercado': forms.TextInput(attrs={'class': 'form-control'}),
             'tipo_equipamento': forms.Select(attrs={'class': 'form-select'}),

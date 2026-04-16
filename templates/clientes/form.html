@@ -18,6 +18,11 @@
     {% csrf_token %}
     <div class="form-section-title"><i class="bi bi-building me-2"></i>Dados do Cliente</div>
     <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Cod FEMSA Cliente</label>
+        {% render_field form.cod_femsa %}
+        {% if form.cod_femsa.errors %}<div class="text-danger small">{{ form.cod_femsa.errors }}</div>{% endif %}
+      </div>
       <div class="col-md-8">
         <label class="form-label">Nome Femsa / Razão Social *</label>
         {% render_field form.nome_femsa %}

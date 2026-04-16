@@ -27,6 +27,9 @@ class Cliente(BaseModel):
 
     # Código auto-gerado via signal (ex.: CLI00001)
     codigo_cliente = models.CharField('Código do Cliente', max_length=10, primary_key=True)
+    cod_femsa = models.CharField(
+        'Cod FEMSA Cliente', max_length=10, blank=True, default=''
+    )
     nome_femsa = models.CharField('Nome Femsa / Razão Social', max_length=200)
     nome_mercado = models.CharField('Nome Mercado / Fantasia', max_length=200)
     tipo_equipamento = models.CharField(
