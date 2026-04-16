@@ -55,6 +55,9 @@ class Transporte(BaseModel):
         'Status Pagamento', max_length=20,
         choices=STATUS_PAGAMENTO, default='pendente'
     )
+    cef_pagamento = models.CharField(
+        'CEF - Pagamento', max_length=10, blank=True, default=''
+    )
     # Campos financeiros
     desconto = models.DecimalField(
         'Desconto (R$)', max_digits=10, decimal_places=2, default=0

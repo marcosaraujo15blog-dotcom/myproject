@@ -106,6 +106,7 @@
           <th class="text-end">Adiant.</th>
           <th class="text-end fw-bold">Total Final</th>
           <th>Pagamento</th>
+          <th>CEF</th>
         </tr>
       </thead>
       <tbody>
@@ -143,10 +144,17 @@
               {{ t.get_status_pagamento_display }}
             </span>
           </td>
+          <td>
+            {% if t.cef_pagamento %}
+              <span class="text-monospace">{{ t.cef_pagamento }}</span>
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="10" class="text-center py-5 text-muted">
+          <td colspan="11" class="text-center py-5 text-muted">
             <i class="bi bi-inbox fs-2 d-block mb-2"></i>
             Nenhum registro encontrado.
           </td>

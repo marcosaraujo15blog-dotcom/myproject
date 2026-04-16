@@ -18,7 +18,7 @@ class TransporteForm(forms.ModelForm):
         fields = [
             'documento_transporte', 'data_transporte',
             'veiculo', 'motorista',
-            'status_transporte', 'status_pagamento',
+            'status_transporte', 'status_pagamento', 'cef_pagamento',
             'desconto', 'acrescimo', 'adiantamento', 'frete_terceiro',
         ]
         widgets = {
@@ -31,6 +31,7 @@ class TransporteForm(forms.ModelForm):
             'motorista': forms.Select(attrs={'class': 'form-select'}),
             'status_transporte': forms.Select(attrs={'class': 'form-select'}),
             'status_pagamento': forms.Select(attrs={'class': 'form-select'}),
+            'cef_pagamento': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '10'}),
             'desconto': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
             'acrescimo': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
             'adiantamento': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),

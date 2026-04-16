@@ -51,6 +51,11 @@
           <label class="form-label">Status de Pagamento</label>
           {% render_field form.status_pagamento %}
         </div>
+        <div class="col-md-6">
+          <label class="form-label">CEF - Pagamento</label>
+          {% render_field form.cef_pagamento %}
+          {% if form.cef_pagamento.errors %}<div class="text-danger small">{{ form.cef_pagamento.errors }}</div>{% endif %}
+        </div>
       </div>
     </div>
 
