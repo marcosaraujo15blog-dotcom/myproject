@@ -122,3 +122,16 @@ class FinanceiroMixin(EmpresaMixin):
             except Exception:
                 raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
+
+
+class SuperuserMixin(LoginRequiredMixin):
+    """Restringe acesso exclusivamente a superusuários (gestão do sistema)."""
+    login_url = '/usuarios/login/'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        if not request.user.is_superuser:
+            messages.error(request, 'Acesso restrito ao administrador do sistema.')
+            return redirect('/')
+        return super().dispatch(request, *args, **kwargs)

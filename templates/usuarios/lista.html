@@ -66,7 +66,7 @@
             {% endif %}
           </td>
           <td>{{ u.empresa.nome_empresa }}</td>
-          <td>{{ u.data_criacao|date:"d/m/Y" }}</td>
+          <td>{{ u.created_at|date:"d/m/Y" }}</td>
           <td class="text-center">
             <div class="d-flex gap-1 justify-content-center">
               <a href="{% url 'usuarios:editar' u.pk %}"

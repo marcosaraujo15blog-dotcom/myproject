@@ -39,7 +39,7 @@
               {{ e.get_status_display }}
             </span>
           </td>
-          <td>{{ e.data_criacao|date:"d/m/Y" }}</td>
+          <td>{{ e.created_at|date:"d/m/Y" }}</td>
           <td class="text-center">
             <div class="d-flex gap-1 justify-content-center">
               <a href="{% url 'empresas:editar' e.pk %}"

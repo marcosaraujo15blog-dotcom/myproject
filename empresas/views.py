@@ -1,18 +1,19 @@
-"""Views de CRUD para Empresa (somente superusuário/admin)."""
+"""Views de CRUD para Empresa (somente superusuário do sistema)."""
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.contrib import messages
+
+from core.mixins import SuperuserMixin
 from .models import Empresa
 from .forms import EmpresaForm
 
 
-class EmpresaListView(LoginRequiredMixin, ListView):
+class EmpresaListView(SuperuserMixin, ListView):
     model = Empresa
     template_name = 'empresas/lista.html'
     context_object_name = 'empresas'
     paginate_by = 20
-    login_url = '/usuarios/login/'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -20,12 +21,15 @@ class EmpresaListView(LoginRequiredMixin, ListView):
         return ctx
 
 
-class EmpresaCreateView(LoginRequiredMixin, CreateView):
+class EmpresaCreateView(SuperuserMixin, CreateView):
     model = Empresa
     form_class = EmpresaForm
     template_name = 'empresas/form.html'
     success_url = reverse_lazy('empresas:lista')
-    login_url = '/usuarios/login/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Empresa cadastrada com sucesso!')
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -33,12 +37,15 @@ class EmpresaCreateView(LoginRequiredMixin, CreateView):
         return ctx
 
 
-class EmpresaUpdateView(LoginRequiredMixin, UpdateView):
+class EmpresaUpdateView(SuperuserMixin, UpdateView):
     model = Empresa
     form_class = EmpresaForm
     template_name = 'empresas/form.html'
     success_url = reverse_lazy('empresas:lista')
-    login_url = '/usuarios/login/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Empresa atualizada com sucesso!')
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -46,15 +53,18 @@ class EmpresaUpdateView(LoginRequiredMixin, UpdateView):
         return ctx
 
 
-class EmpresaDeleteView(LoginRequiredMixin, DeleteView):
+class EmpresaDeleteView(SuperuserMixin, DeleteView):
     model = Empresa
     template_name = 'confirm_delete.html'
     success_url = reverse_lazy('empresas:lista')
-    login_url = '/usuarios/login/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Empresa excluída com sucesso!')
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['titulo'] = 'Excluir Empresa'
-        ctx['objeto'] = self.object
+        ctx['objeto'] = str(self.object)
         ctx['voltar_url'] = reverse_lazy('empresas:lista')
         return ctx

@@ -96,12 +96,23 @@
         </a>
       </li>
       {% endif %}
+      {% if request.user.is_superuser %}
+      <li class="nav-item {% if 'empresas' in request.resolver_match.namespace %}active{% endif %}">
+        <a href="{% url 'empresas:lista' %}" class="nav-link">
+          <i class="bi bi-buildings"></i>
+          <span>Empresas</span>
+        </a>
+      </li>
+      {% endif %}
       <li class="nav-divider"></li>
       <li class="nav-item">
-        <a href="{% url 'usuarios:logout' %}" class="nav-link nav-link-danger">
-          <i class="bi bi-box-arrow-left"></i>
-          <span>Sair</span>
-        </a>
+        <form method="post" action="{% url 'usuarios:logout' %}" id="logoutForm">
+          {% csrf_token %}
+          <button type="submit" class="nav-link nav-link-danger w-100 border-0 bg-transparent text-start">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Sair</span>
+          </button>
+        </form>
       </li>
     </ul>
   </nav>
